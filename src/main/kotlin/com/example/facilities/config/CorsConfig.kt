@@ -15,5 +15,9 @@ class CorsConfig(
         registry.addMapping("/v1/**")
             .allowedOrigins(*origins.toTypedArray())
             .allowedMethods("GET")
+        registry.addMapping("/admin/v1/**")
+            .allowedOrigins(*origins.toTypedArray())
+            .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+            .allowedHeaders("*")
     }
 }
