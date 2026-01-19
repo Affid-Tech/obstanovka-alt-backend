@@ -1,0 +1,389 @@
+openapi: 3.1.0
+info:
+  title: Music Facilities Directory API
+  version: 1.0.0
+  description: Read-only API for browsing musical facilities by city.
+servers:
+  - url: https://api.example.com
+tags:
+  - name: Cities
+  - name: Facilities
+  - name: Meta
+
+paths:
+  /v1/cities:
+    get:
+      tags: [Cities]
+      summary: List supported cities
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CityListResponse"
+
+  /v1/meta:
+    get:
+      tags: [Meta]
+      summary: Get metadata for filters (capabilities, features, equipment categories, space types)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetaResponse"
+
+  /v1/facilities:
+    get:
+      tags: [Facilities]
+      summary: List facilities (city-scoped) with filters, sorting and pagination
+      parameters:
+        - in: query
+          name: cityId
+          required: true
+          schema: { type: string, format: uuid }
+        - in: query
+          name: q
+          required: false
+          schema: { type: string }
+          description: Full-text search over name/description
+        - in: query
+          name: capability
+          required: false
+          schema:
+            type: array
+            items: { type: string }
+          style: form
+          explode: true
+          description: Capability codes (multi)
+        - in: query
+          name: feature
+          required: false
+          schema:
+            type: array
+            items: { type: string }
+          style: form
+          explode: true
+          description: Feature codes (multi)
+        - in: query
+          name: equipmentCategory
+          required: false
+          schema:
+            type: array
+            items: { type: string }
+          style: form
+          explode: true
+          description: Equipment category codes (multi)
+        - in: query
+          name: spaceType
+          required: false
+          schema:
+            type: array
+            items: { type: string }
+          style: form
+          explode: true
+          description: Space type codes (multi)
+        - in: query
+          name: hasAddress
+          required: false
+          schema: { type: boolean }
+        - in: query
+          name: hasCoordinates
+          required: false
+          schema: { type: boolean }
+        - in: query
+          name: priceMin
+          required: false
+          schema: { type: number }
+        - in: query
+          name: priceMax
+          required: false
+          schema: { type: number }
+        - in: query
+          name: sort
+          required: false
+          schema:
+            type: string
+            enum: [RECOMMENDED, NAME_ASC, PRICE_ASC, COORDINATES_FIRST]
+          default: RECOMMENDED
+        - in: query
+          name: page
+          required: false
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: pageSize
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FacilityListResponse"
+
+  /v1/facilities/{facilityId}:
+    get:
+      tags: [Facilities]
+      summary: Get facility details by id
+      parameters:
+        - in: path
+          name: facilityId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FacilityDetailsResponse"
+        "404":
+          description: Not found
+
+components:
+  schemas:
+    CityDTO:
+      type: object
+      required: [id, name, countryCode]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        countryCode: { type: string, minLength: 2, maxLength: 2 }
+        center:
+          type: object
+          required: [lat, lng]
+          properties:
+            lat: { type: number }
+            lng: { type: number }
+
+    CityListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/CityDTO" }
+
+    MetaResponse:
+      type: object
+      required: [capabilities, features, equipmentCategories, spaceTypes]
+      properties:
+        capabilities:
+          type: array
+          items:
+            type: object
+            required: [code, label]
+            properties:
+              code: { type: string }
+              label: { type: string }
+        features:
+          type: array
+          items:
+            type: object
+            required: [code, label, valueType]
+            properties:
+              code: { type: string }
+              label: { type: string }
+              valueType: { type: string, enum: [BOOL, TEXT, NUMBER] }
+        equipmentCategories:
+          type: array
+          items:
+            type: object
+            required: [code, label]
+            properties:
+              code: { type: string }
+              label: { type: string }
+        spaceTypes:
+          type: array
+          items:
+            type: object
+            required: [code, label]
+            properties:
+              code: { type: string }
+              label: { type: string }
+
+    PriceHintDTO:
+      type: object
+      required: [kind, currency]
+      properties:
+        kind:
+          type: string
+          enum: [FROM_HOURLY, RANGE_HOURLY, FROM_DAILY, PER_EVENT, CONTACT]
+        amountFrom: { type: number }
+        amountTo: { type: number }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        note: { type: string }
+
+    FacilityCardDTO:
+      type: object
+      required: [id, name, city, capabilities, featureCodes, equipmentCategoryCodes]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        city:
+          type: object
+          required: [id, name]
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+        addressLabel: { type: string }
+        coordinates:
+          type: object
+          required: [lat, lng]
+          properties:
+            lat: { type: number }
+            lng: { type: number }
+        coverImageUrl: { type: string }
+        capabilities:
+          type: array
+          items:
+            type: object
+            required: [code, label]
+            properties:
+              code: { type: string }
+              label: { type: string }
+        priceHint:
+          $ref: "#/components/schemas/PriceHintDTO"
+        featureCodes:
+          type: array
+          items: { type: string }
+        equipmentCategoryCodes:
+          type: array
+          items: { type: string }
+
+    FacilityListResponse:
+      type: object
+      required: [items, page, pageSize, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/FacilityCardDTO" }
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer }
+
+    ContactPointDTO:
+      type: object
+      required: [type, value, isPrimary]
+      properties:
+        type:
+          type: string
+          enum: [PHONE, EMAIL, WEBSITE, INSTAGRAM, FACEBOOK, TELEGRAM, WHATSAPP, OTHER]
+        value: { type: string }
+        label: { type: string }
+        isPrimary: { type: boolean }
+
+    OpeningHoursDTO:
+      type: object
+      required: [dayOfWeek, isClosed]
+      properties:
+        dayOfWeek: { type: integer, minimum: 1, maximum: 7 }
+        isClosed: { type: boolean }
+        openTime: { type: string, description: "HH:mm" }
+        closeTime: { type: string, description: "HH:mm" }
+        note: { type: string }
+
+    MediaItemDTO:
+      type: object
+      required: [url, sortOrder]
+      properties:
+        url: { type: string }
+        caption: { type: string }
+        sortOrder: { type: integer }
+
+    SpaceDTO:
+      type: object
+      required: [id, name, typeCode]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        typeCode: { type: string }
+        capacityPeople: { type: integer }
+        sizeM2: { type: number }
+        description: { type: string }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaItemDTO" }
+        attributes:
+          type: array
+          items:
+            type: object
+            required: [code, label, value]
+            properties:
+              code: { type: string }
+              label: { type: string }
+              value:
+                oneOf:
+                  - { type: boolean }
+                  - { type: number }
+                  - { type: string }
+              unit: { type: string }
+
+    FacilityDetailsDTO:
+      allOf:
+        - $ref: "#/components/schemas/FacilityCardDTO"
+        - type: object
+          required: [gallery, contacts, openingHours, capabilityDetails, equipment, features]
+          properties:
+            description: { type: string }
+            gallery:
+              type: array
+              items: { $ref: "#/components/schemas/MediaItemDTO" }
+            contacts:
+              type: array
+              items: { $ref: "#/components/schemas/ContactPointDTO" }
+            openingHours:
+              type: array
+              items: { $ref: "#/components/schemas/OpeningHoursDTO" }
+            capabilityDetails:
+              type: array
+              items:
+                type: object
+                required: [code, label]
+                properties:
+                  code: { type: string }
+                  label: { type: string }
+                  summary: { type: string }
+                  details: { type: object }
+            spaces:
+              type: array
+              items: { $ref: "#/components/schemas/SpaceDTO" }
+            equipment:
+              type: array
+              items:
+                type: object
+                required: [category, items]
+                properties:
+                  category: { type: string }
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [name, mode]
+                      properties:
+                        name: { type: string }
+                        quantity: { type: integer }
+                        mode: { type: string, enum: [IN_HOUSE, RENTABLE, ON_REQUEST] }
+                        note: { type: string }
+            features:
+              type: array
+              items:
+                type: object
+                required: [code, label]
+                properties:
+                  code: { type: string }
+                  label: { type: string }
+                  value:
+                    oneOf:
+                      - { type: boolean }
+                      - { type: number }
+                      - { type: string }
+
+    FacilityDetailsResponse:
+      type: object
+      required: [item]
+      properties:
+        item: { $ref: "#/components/schemas/FacilityDetailsDTO" }
