@@ -659,7 +659,7 @@ class FacilityRepository(
                 facilityId = facilityId,
                 code = rs.getString("code"),
                 label = rs.getString("label"),
-                valueBool = rs.getObject("value_bool", Boolean::class.java),
+                valueBool = rs.getObject("value_bool", Boolean::class.javaObjectType),
                 valueText = rs.getString("value_text"),
                 valueNumber = rs.getBigDecimal("value_number")
             )
@@ -685,7 +685,7 @@ class FacilityRepository(
             where f.id = :facilityId
               and f.status = 'ACTIVE'
         """.trimIndent()
-        return jdbcTemplate.query(sql, params, RowMapper { rs, _ -> mapFacilityBaseRow(rs) }).firstOrNull()
+        return jdbcTemplate.query(sql, params) { rs, _ -> mapFacilityBaseRow(rs) }.firstOrNull()
     }
 
     private fun mapFacilityBaseRow(rs: ResultSet): FacilityBaseRow = FacilityBaseRow(
