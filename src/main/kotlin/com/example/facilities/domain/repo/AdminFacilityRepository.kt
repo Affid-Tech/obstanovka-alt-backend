@@ -3,6 +3,7 @@ package com.example.facilities.domain.repo
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
+import java.time.OffsetDateTime
 import java.util.UUID
 
 @Repository
@@ -16,12 +17,14 @@ class AdminFacilityRepository(
         val description: String?,
         val addressId: UUID?,
         val coverMediaId: UUID?,
-        val status: String
+        val status: String,
+        val createdAt: OffsetDateTime? = null,
+        val updatedAt: OffsetDateTime? = null
     )
 
     fun fetchById(id: UUID): FacilityRow? {
         val sql = """
-            select id, city_id, name, description, address_id, cover_media_id, status
+            select id, city_id, name, description, address_id, cover_media_id, status, created_at, updated_at
             from facility
             where id = :id
         """.trimIndent()
@@ -34,7 +37,9 @@ class AdminFacilityRepository(
                 description = rs.getString("description"),
                 addressId = rs.getString("address_id")?.let(UUID::fromString),
                 coverMediaId = rs.getString("cover_media_id")?.let(UUID::fromString),
-                status = rs.getString("status")
+                status = rs.getString("status"),
+                createdAt = rs.getObject("created_at", OffsetDateTime::class.java),
+                updatedAt = rs.getObject("updated_at", OffsetDateTime::class.java)
             )
         }.firstOrNull()
     }

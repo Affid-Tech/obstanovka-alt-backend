@@ -88,4 +88,13 @@ class AdminEquipmentTypeRepository(
         val sql = "delete from equipment_type where id = :id"
         jdbcTemplate.update(sql, MapSqlParameterSource("id", id))
     }
+
+    fun isReferenced(id: UUID): Boolean {
+        val sql = """
+            select exists(
+                select 1 from facility_equipment where equipment_type_id = :id
+            )
+        """.trimIndent()
+        return jdbcTemplate.queryForObject(sql, MapSqlParameterSource("id", id), Boolean::class.java) ?: false
+    }
 }
