@@ -57,6 +57,14 @@ insert into facility_feature (facility_id, feature_id, value_bool)
 select 'dddddddd-0000-0000-0000-000000000003', id, true
 from feature where code in ('PARKING', 'WHEELCHAIR_ACCESS');
 
+insert into facility_feature (facility_id, feature_id, value_number)
+select 'dddddddd-0000-0000-0000-000000000001', id, 110
+from feature where code = 'MAX_VOLUME_DB';
+
+insert into facility_feature (facility_id, feature_id, value_text)
+select 'dddddddd-0000-0000-0000-000000000002', id, 'Please arrive 15 minutes early for setup.'
+from feature where code = 'HOUSE_NOTES';
+
 insert into space (id, facility_id, space_type_id, name, description, capacity_people, size_m2)
 select 'eeeeeeee-0000-0000-0000-000000000001', 'dddddddd-0000-0000-0000-000000000001', id, 'Room A', 'Soundproof room with backline', 6, 22.5
 from space_type where code = 'REHEARSAL_ROOM';
