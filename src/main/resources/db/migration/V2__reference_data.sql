@@ -10,7 +10,9 @@ insert into feature (id, code, label, value_type) values
     (uuid_generate_v4(), 'AIRCON', 'Air conditioning', 'BOOL'),
     (uuid_generate_v4(), 'SOUNDPROOF', 'Soundproof', 'BOOL'),
     (uuid_generate_v4(), 'WHEELCHAIR_ACCESS', 'Wheelchair access', 'BOOL'),
-    (uuid_generate_v4(), 'DELIVERY_AVAILABLE', 'Delivery available', 'BOOL');
+    (uuid_generate_v4(), 'DELIVERY_AVAILABLE', 'Delivery available', 'BOOL'),
+    (uuid_generate_v4(), 'MAX_VOLUME_DB', 'Max volume (dB)', 'NUMBER'),
+    (uuid_generate_v4(), 'HOUSE_NOTES', 'House notes', 'TEXT');
 
 insert into space_type (id, code, label) values
     (uuid_generate_v4(), 'REHEARSAL_ROOM', 'Rehearsal room'),
