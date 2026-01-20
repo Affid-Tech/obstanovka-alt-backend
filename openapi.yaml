@@ -2,13 +2,18 @@ openapi: 3.1.0
 info:
   title: Music Facilities Directory API
   version: 1.0.0
-  description: Read-only API for browsing musical facilities by city.
+  description: Read-only API for browsing musical facilities by city, plus admin CRUD endpoints.
 servers:
   - url: https://api.example.com
 tags:
   - name: Cities
   - name: Facilities
   - name: Meta
+  - name: Admin Cities
+  - name: Admin Facilities
+  - name: Admin Spaces
+  - name: Admin Media
+  - name: Admin Reference
 
 paths:
   /v1/cities:
@@ -143,7 +148,828 @@ paths:
         "404":
           description: Not found
 
+  /admin/v1/cities:
+    get:
+      tags: [Admin Cities]
+      summary: List cities
+      security:
+        - basicAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminCity" }
+    post:
+      tags: [Admin Cities]
+      summary: Create a city
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCityCreate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCity" }
+
+  /admin/v1/cities/{id}:
+    get:
+      tags: [Admin Cities]
+      summary: Get a city
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCity" }
+        "404":
+          description: Not found
+    put:
+      tags: [Admin Cities]
+      summary: Update a city
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCityUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCity" }
+    delete:
+      tags: [Admin Cities]
+      summary: Delete a city
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/facilities:
+    post:
+      tags: [Admin Facilities]
+      summary: Create a facility
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminFacilityCreate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminFacility" }
+
+  /admin/v1/facilities/{id}:
+    get:
+      tags: [Admin Facilities]
+      summary: Get a facility
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminFacility" }
+        "404":
+          description: Not found
+    put:
+      tags: [Admin Facilities]
+      summary: Update a facility
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminFacilityUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminFacility" }
+    delete:
+      tags: [Admin Facilities]
+      summary: Delete a facility
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/facilities/{id}/contacts:
+    put:
+      tags: [Admin Facilities]
+      summary: Replace facility contacts
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { $ref: "#/components/schemas/AdminContactPointCreate" }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/facilities/{id}/opening-hours:
+    put:
+      tags: [Admin Facilities]
+      summary: Replace facility opening hours
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { $ref: "#/components/schemas/AdminOpeningHours" }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/facilities/{id}/capabilities:
+    put:
+      tags: [Admin Facilities]
+      summary: Replace facility capabilities
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { $ref: "#/components/schemas/AdminFacilityCapability" }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/facilities/{id}/features:
+    put:
+      tags: [Admin Facilities]
+      summary: Replace facility features
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { $ref: "#/components/schemas/AdminFacilityFeature" }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/facilities/{id}/equipment:
+    put:
+      tags: [Admin Facilities]
+      summary: Replace facility equipment
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { $ref: "#/components/schemas/AdminFacilityEquipment" }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/facilities/{id}/prices:
+    put:
+      tags: [Admin Facilities]
+      summary: Replace facility price info
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { $ref: "#/components/schemas/AdminPriceInfoCreate" }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/facilities/{id}/media:
+    put:
+      tags: [Admin Facilities]
+      summary: Replace facility media
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { $ref: "#/components/schemas/AdminFacilityMedia" }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/spaces:
+    post:
+      tags: [Admin Spaces]
+      summary: Create a space
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminSpaceCreate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminSpace" }
+
+  /admin/v1/spaces/{id}:
+    get:
+      tags: [Admin Spaces]
+      summary: Get a space
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminSpace" }
+        "404":
+          description: Not found
+    put:
+      tags: [Admin Spaces]
+      summary: Update a space
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminSpaceUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminSpace" }
+    delete:
+      tags: [Admin Spaces]
+      summary: Delete a space
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/spaces/{id}/media:
+    put:
+      tags: [Admin Spaces]
+      summary: Replace space media
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { $ref: "#/components/schemas/AdminSpaceMedia" }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/media:
+    post:
+      tags: [Admin Media]
+      summary: Create media
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminMediaCreate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminMedia" }
+
+  /admin/v1/media/{id}:
+    get:
+      tags: [Admin Media]
+      summary: Get media
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminMedia" }
+        "404":
+          description: Not found
+    put:
+      tags: [Admin Media]
+      summary: Update media
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminMediaUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminMedia" }
+    delete:
+      tags: [Admin Media]
+      summary: Delete media
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/reference/capability-types:
+    get:
+      tags: [Admin Reference]
+      summary: List capability types
+      security:
+        - basicAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminCapabilityType" }
+    post:
+      tags: [Admin Reference]
+      summary: Create capability type
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCapabilityTypeCreate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCapabilityType" }
+
+  /admin/v1/reference/capability-types/{id}:
+    get:
+      tags: [Admin Reference]
+      summary: Get capability type
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCapabilityType" }
+        "404":
+          description: Not found
+    put:
+      tags: [Admin Reference]
+      summary: Update capability type
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCapabilityTypeUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCapabilityType" }
+    delete:
+      tags: [Admin Reference]
+      summary: Delete capability type
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/reference/features:
+    get:
+      tags: [Admin Reference]
+      summary: List features
+      security:
+        - basicAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminFeature" }
+    post:
+      tags: [Admin Reference]
+      summary: Create feature
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminFeatureCreate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminFeature" }
+
+  /admin/v1/reference/features/{id}:
+    get:
+      tags: [Admin Reference]
+      summary: Get feature
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminFeature" }
+        "404":
+          description: Not found
+    put:
+      tags: [Admin Reference]
+      summary: Update feature
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminFeatureUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminFeature" }
+    delete:
+      tags: [Admin Reference]
+      summary: Delete feature
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/reference/space-types:
+    get:
+      tags: [Admin Reference]
+      summary: List space types
+      security:
+        - basicAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminSpaceType" }
+    post:
+      tags: [Admin Reference]
+      summary: Create space type
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminSpaceTypeCreate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminSpaceType" }
+
+  /admin/v1/reference/space-types/{id}:
+    get:
+      tags: [Admin Reference]
+      summary: Get space type
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminSpaceType" }
+        "404":
+          description: Not found
+    put:
+      tags: [Admin Reference]
+      summary: Update space type
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminSpaceTypeUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminSpaceType" }
+    delete:
+      tags: [Admin Reference]
+      summary: Delete space type
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: No content
+
+  /admin/v1/reference/equipment-types:
+    get:
+      tags: [Admin Reference]
+      summary: List equipment types
+      security:
+        - basicAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminEquipmentType" }
+    post:
+      tags: [Admin Reference]
+      summary: Create equipment type
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminEquipmentTypeCreate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminEquipmentType" }
+
+  /admin/v1/reference/equipment-types/{id}:
+    get:
+      tags: [Admin Reference]
+      summary: Get equipment type
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminEquipmentType" }
+        "404":
+          description: Not found
+    put:
+      tags: [Admin Reference]
+      summary: Update equipment type
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminEquipmentTypeUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminEquipmentType" }
+    delete:
+      tags: [Admin Reference]
+      summary: Delete equipment type
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: No content
+
 components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
   schemas:
     CityDTO:
       type: object
@@ -387,3 +1213,357 @@ components:
       required: [item]
       properties:
         item: { $ref: "#/components/schemas/FacilityDetailsDTO" }
+
+    AdminCoordinates:
+      type: object
+      required: [lat, lng]
+      properties:
+        lat: { type: number }
+        lng: { type: number }
+
+    AdminCity:
+      type: object
+      required: [id, name, countryCode]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        countryCode: { type: string, minLength: 2, maxLength: 2 }
+        center: { $ref: "#/components/schemas/AdminCoordinates" }
+
+    AdminCityCreate:
+      type: object
+      required: [name, countryCode]
+      properties:
+        name: { type: string, minLength: 1 }
+        countryCode: { type: string, minLength: 2, maxLength: 2 }
+        center: { $ref: "#/components/schemas/AdminCoordinates" }
+
+    AdminCityUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        countryCode: { type: string, minLength: 2, maxLength: 2 }
+        center: { $ref: "#/components/schemas/AdminCoordinates" }
+
+    AdminAddress:
+      type: object
+      required: [id, cityId, label]
+      properties:
+        id: { type: string, format: uuid }
+        cityId: { type: string, format: uuid }
+        label: { type: string }
+        lat: { type: number }
+        lng: { type: number }
+
+    AdminAddressCreate:
+      type: object
+      required: [cityId, label]
+      properties:
+        cityId: { type: string, format: uuid }
+        label: { type: string, minLength: 1 }
+        lat: { type: number }
+        lng: { type: number }
+
+    AdminAddressUpdate:
+      type: object
+      properties:
+        cityId: { type: string, format: uuid }
+        label: { type: string, minLength: 1 }
+        lat: { type: number }
+        lng: { type: number }
+
+    AdminMedia:
+      type: object
+      required: [id, url, kind, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        url: { type: string, format: uri }
+        kind: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    AdminMediaCreate:
+      type: object
+      required: [url]
+      properties:
+        url: { type: string, format: uri }
+        kind: { type: string }
+
+    AdminMediaUpdate:
+      type: object
+      properties:
+        url: { type: string, format: uri }
+        kind: { type: string }
+
+    AdminFacility:
+      type: object
+      required: [id, cityId, name, status, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        cityId: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: string }
+        addressId: { type: string, format: uuid }
+        coverMediaId: { type: string, format: uuid }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    AdminFacilityCreate:
+      type: object
+      required: [cityId, name, status]
+      properties:
+        cityId: { type: string, format: uuid }
+        name: { type: string, minLength: 1 }
+        description: { type: string }
+        addressId: { type: string, format: uuid }
+        coverMediaId: { type: string, format: uuid }
+        status: { type: string, minLength: 1 }
+
+    AdminFacilityUpdate:
+      type: object
+      properties:
+        cityId: { type: string, format: uuid }
+        name: { type: string, minLength: 1 }
+        description: { type: string }
+        addressId: { type: string, format: uuid }
+        coverMediaId: { type: string, format: uuid }
+        status: { type: string, minLength: 1 }
+
+    AdminFacilityMedia:
+      type: object
+      required: [mediaId]
+      properties:
+        mediaId: { type: string, format: uuid }
+        sortOrder: { type: integer }
+        caption: { type: string }
+        isCover: { type: boolean }
+
+    AdminContactPoint:
+      type: object
+      required: [id, facilityId, type, value, isPrimary]
+      properties:
+        id: { type: string, format: uuid }
+        facilityId: { type: string, format: uuid }
+        type: { type: string }
+        value: { type: string }
+        label: { type: string }
+        isPrimary: { type: boolean }
+
+    AdminContactPointCreate:
+      type: object
+      required: [type, value]
+      properties:
+        type: { type: string }
+        value: { type: string }
+        label: { type: string }
+        isPrimary: { type: boolean }
+
+    AdminOpeningHours:
+      type: object
+      required: [dayOfWeek, isClosed]
+      properties:
+        dayOfWeek: { type: integer, minimum: 1, maximum: 7 }
+        isClosed: { type: boolean }
+        openTime: { type: string }
+        closeTime: { type: string }
+        note: { type: string }
+
+    AdminCapabilityType:
+      type: object
+      required: [id, code, label]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        label: { type: string }
+
+    AdminCapabilityTypeCreate:
+      type: object
+      required: [code, label]
+      properties:
+        code: { type: string, minLength: 1 }
+        label: { type: string, minLength: 1 }
+
+    AdminCapabilityTypeUpdate:
+      type: object
+      properties:
+        code: { type: string, minLength: 1 }
+        label: { type: string, minLength: 1 }
+
+    AdminFacilityCapability:
+      type: object
+      required: [capabilityTypeId]
+      properties:
+        capabilityTypeId: { type: string, format: uuid }
+        summary: { type: string }
+        details: { type: object }
+        isActive: { type: boolean }
+
+    AdminSpaceType:
+      type: object
+      required: [id, code, label]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        label: { type: string }
+
+    AdminSpaceTypeCreate:
+      type: object
+      required: [code, label]
+      properties:
+        code: { type: string, minLength: 1 }
+        label: { type: string, minLength: 1 }
+
+    AdminSpaceTypeUpdate:
+      type: object
+      properties:
+        code: { type: string, minLength: 1 }
+        label: { type: string, minLength: 1 }
+
+    AdminSpace:
+      type: object
+      required: [id, facilityId, spaceTypeId, name]
+      properties:
+        id: { type: string, format: uuid }
+        facilityId: { type: string, format: uuid }
+        spaceTypeId: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: string }
+        capacityPeople: { type: integer }
+        sizeM2: { type: number }
+
+    AdminSpaceCreate:
+      type: object
+      required: [facilityId, spaceTypeId, name]
+      properties:
+        facilityId: { type: string, format: uuid }
+        spaceTypeId: { type: string, format: uuid }
+        name: { type: string, minLength: 1 }
+        description: { type: string }
+        capacityPeople: { type: integer }
+        sizeM2: { type: number }
+
+    AdminSpaceUpdate:
+      type: object
+      properties:
+        spaceTypeId: { type: string, format: uuid }
+        name: { type: string, minLength: 1 }
+        description: { type: string }
+        capacityPeople: { type: integer }
+        sizeM2: { type: number }
+
+    AdminSpaceMedia:
+      type: object
+      required: [mediaId]
+      properties:
+        mediaId: { type: string, format: uuid }
+        sortOrder: { type: integer }
+        caption: { type: string }
+
+    AdminEquipmentType:
+      type: object
+      required: [id, name, categoryCode]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        categoryCode: { type: string }
+        description: { type: string }
+        coverMediaId: { type: string, format: uuid }
+
+    AdminEquipmentTypeCreate:
+      type: object
+      required: [name, categoryCode]
+      properties:
+        name: { type: string, minLength: 1 }
+        categoryCode: { type: string, minLength: 1 }
+        description: { type: string }
+        coverMediaId: { type: string, format: uuid }
+
+    AdminEquipmentTypeUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        categoryCode: { type: string, minLength: 1 }
+        description: { type: string }
+        coverMediaId: { type: string, format: uuid }
+
+    AdminFacilityEquipment:
+      type: object
+      required: [equipmentTypeId, mode]
+      properties:
+        equipmentTypeId: { type: string, format: uuid }
+        quantity: { type: integer }
+        mode:
+          type: string
+          enum: [IN_HOUSE, RENTABLE, ON_REQUEST]
+        note: { type: string }
+
+    AdminFeature:
+      type: object
+      required: [id, code, label, valueType]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        label: { type: string }
+        valueType: { type: string }
+
+    AdminFeatureCreate:
+      type: object
+      required: [code, label, valueType]
+      properties:
+        code: { type: string, minLength: 1 }
+        label: { type: string, minLength: 1 }
+        valueType: { type: string, minLength: 1 }
+
+    AdminFeatureUpdate:
+      type: object
+      properties:
+        code: { type: string, minLength: 1 }
+        label: { type: string, minLength: 1 }
+        valueType: { type: string, minLength: 1 }
+
+    AdminFacilityFeature:
+      type: object
+      required: [featureId]
+      properties:
+        featureId: { type: string, format: uuid }
+        valueBool: { type: boolean }
+        valueText: { type: string }
+        valueNumber: { type: number }
+
+    AdminPriceInfo:
+      type: object
+      required: [id, facilityId, kind, currency]
+      properties:
+        id: { type: string, format: uuid }
+        facilityId: { type: string, format: uuid }
+        capabilityTypeId: { type: string, format: uuid }
+        spaceId: { type: string, format: uuid }
+        kind: { type: string }
+        amountFrom: { type: number }
+        amountTo: { type: number }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        note: { type: string }
+
+    AdminPriceInfoCreate:
+      type: object
+      required: [facilityId, kind, currency]
+      properties:
+        facilityId: { type: string, format: uuid }
+        capabilityTypeId: { type: string, format: uuid }
+        spaceId: { type: string, format: uuid }
+        kind: { type: string, minLength: 1 }
+        amountFrom: { type: number }
+        amountTo: { type: number }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        note: { type: string }
+
+    AdminPriceInfoUpdate:
+      type: object
+      properties:
+        capabilityTypeId: { type: string, format: uuid }
+        spaceId: { type: string, format: uuid }
+        kind: { type: string, minLength: 1 }
+        amountFrom: { type: number }
+        amountTo: { type: number }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        note: { type: string }
