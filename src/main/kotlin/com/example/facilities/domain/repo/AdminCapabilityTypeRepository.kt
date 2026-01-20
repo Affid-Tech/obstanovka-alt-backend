@@ -76,4 +76,15 @@ class AdminCapabilityTypeRepository(
         val sql = "delete from capability_type where id = :id"
         jdbcTemplate.update(sql, MapSqlParameterSource("id", id))
     }
+
+    fun isReferenced(id: UUID): Boolean {
+        val sql = """
+            select exists(
+                select 1 from facility_capability where capability_type_id = :id
+            ) or exists(
+                select 1 from price_info where capability_type_id = :id
+            )
+        """.trimIndent()
+        return jdbcTemplate.queryForObject(sql, MapSqlParameterSource("id", id), Boolean::class.java) ?: false
+    }
 }

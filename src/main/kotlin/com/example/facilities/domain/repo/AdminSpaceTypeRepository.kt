@@ -76,4 +76,13 @@ class AdminSpaceTypeRepository(
         val sql = "delete from space_type where id = :id"
         jdbcTemplate.update(sql, MapSqlParameterSource("id", id))
     }
+
+    fun isReferenced(id: UUID): Boolean {
+        val sql = """
+            select exists(
+                select 1 from space where space_type_id = :id
+            )
+        """.trimIndent()
+        return jdbcTemplate.queryForObject(sql, MapSqlParameterSource("id", id), Boolean::class.java) ?: false
+    }
 }

@@ -82,4 +82,13 @@ class AdminFeatureRepository(
         val sql = "delete from feature where id = :id"
         jdbcTemplate.update(sql, MapSqlParameterSource("id", id))
     }
+
+    fun isReferenced(id: UUID): Boolean {
+        val sql = """
+            select exists(
+                select 1 from facility_feature where feature_id = :id
+            )
+        """.trimIndent()
+        return jdbcTemplate.queryForObject(sql, MapSqlParameterSource("id", id), Boolean::class.java) ?: false
+    }
 }
