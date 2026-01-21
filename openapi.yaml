@@ -370,6 +370,11 @@ paths:
       responses:
         "204":
           description: No content
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
 
   /admin/v1/facilities/{id}/features:
     put:
@@ -709,6 +714,119 @@ paths:
       responses:
         "204":
           description: No content
+
+  /admin/v1/reference/capability-schemas:
+    get:
+      tags: [Admin Reference]
+      summary: List capability schemas (latest versions)
+      security:
+        - basicAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminCapabilitySchema" }
+    post:
+      tags: [Admin Reference]
+      summary: Create initial schema for a capability (version=1)
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCapabilitySchemaCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCapabilitySchema" }
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
+
+  /admin/v1/reference/capability-schemas/{capabilityCode}:
+    get:
+      tags: [Admin Reference]
+      summary: Get ACTIVE schema for a capability code
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: capabilityCode
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCapabilitySchema" }
+        "404":
+          description: Not found
+    put:
+      tags: [Admin Reference]
+      summary: Replace schema fields in-place (no version bump)
+      description: |
+        Edits the current ACTIVE schema without bumping version.
+        Use only if you accept that existing facility details might become invalid.
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: capabilityCode
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCapabilitySchemaUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCapabilitySchema" }
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
+
+  /admin/v1/reference/capability-schemas/{capabilityCode}/publish:
+    post:
+      tags: [Admin Reference]
+      summary: Publish a new schema version (bump version, activate it)
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: capabilityCode
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCapabilitySchemaUpdate" }
+      responses:
+        "201":
+          description: Created new ACTIVE version; previous ACTIVE set to INACTIVE
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCapabilitySchema" }
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
 
   /admin/v1/reference/features:
     get:
@@ -1389,6 +1507,88 @@ components:
         code: { type: string, minLength: 1 }
         label: { type: string, minLength: 1 }
 
+    AdminCapabilitySchema:
+      type: object
+      required: [id, capabilityCode, version, status, title, fields]
+      properties:
+        id: { type: string, format: uuid }
+        capabilityCode: { type: string }
+        version: { type: integer, minimum: 1 }
+        status: { type: string, enum: [ACTIVE, INACTIVE] }
+        title: { type: string }
+        description: { type: string }
+        fields:
+          type: array
+          items: { $ref: "#/components/schemas/AdminCapabilitySchemaField" }
+
+    AdminCapabilitySchemaField:
+      type: object
+      required: [id, key, label, valueType, required, sortOrder]
+      properties:
+        id: { type: string, format: uuid }
+        key:
+          type: string
+          description: "Dot-path key, e.g. stage.widthM"
+        label: { type: string }
+        helpText: { type: string }
+        valueType: { type: string, enum: [BOOL, NUMBER, TEXT, ENUM] }
+        required: { type: boolean }
+        defaultValue:
+          description: "JSON value; type must match valueType"
+          type: object
+        unit: { type: string }
+        minNumber: { type: number }
+        maxNumber: { type: number }
+        regex: { type: string }
+        enumOptions:
+          type: array
+          items: { type: string }
+        uiComponent: { type: string }
+        groupName: { type: string }
+        sortOrder: { type: integer }
+
+    AdminCapabilitySchemaCreate:
+      type: object
+      required: [capabilityCode, title, fields]
+      properties:
+        capabilityCode: { type: string }
+        title: { type: string }
+        description: { type: string }
+        fields:
+          type: array
+          items: { $ref: "#/components/schemas/AdminCapabilitySchemaFieldCreate" }
+
+    AdminCapabilitySchemaFieldCreate:
+      type: object
+      required: [key, label, valueType, required, sortOrder]
+      properties:
+        key: { type: string }
+        label: { type: string }
+        helpText: { type: string }
+        valueType: { type: string, enum: [BOOL, NUMBER, TEXT, ENUM] }
+        required: { type: boolean }
+        defaultValue: { type: object }
+        unit: { type: string }
+        minNumber: { type: number }
+        maxNumber: { type: number }
+        regex: { type: string }
+        enumOptions:
+          type: array
+          items: { type: string }
+        uiComponent: { type: string }
+        groupName: { type: string }
+        sortOrder: { type: integer }
+
+    AdminCapabilitySchemaUpdate:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        status: { type: string, enum: [ACTIVE, INACTIVE] }
+        fields:
+          type: array
+          items: { $ref: "#/components/schemas/AdminCapabilitySchemaFieldCreate" }
+
     AdminFacilityCapability:
       type: object
       required: [capabilityTypeId]
@@ -1567,3 +1767,18 @@ components:
         amountTo: { type: number }
         currency: { type: string, minLength: 3, maxLength: 3 }
         note: { type: string }
+
+    ValidationErrorResponse:
+      type: object
+      required: [code, message, fieldErrors]
+      properties:
+        code: { type: string, example: "VALIDATION_ERROR" }
+        message: { type: string }
+        fieldErrors:
+          type: array
+          items:
+            type: object
+            required: [path, message]
+            properties:
+              path: { type: string, example: "capabilities[CONCERT].details.capacity" }
+              message: { type: string }
